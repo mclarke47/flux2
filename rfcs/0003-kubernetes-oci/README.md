@@ -4,7 +4,7 @@
 
 **Creation date:** 2022-03-31
 
-**Last update:** 2023-02-20
+**Last update:** 2023-11-07
 
 ## Summary
 
@@ -232,13 +232,25 @@ spec:
 ```
 
 For verifying public artifacts which are signed using the keyless method,
-the `spec.verify.secretRef` field must be omitted:
+the `.spec.verify.matchOIDCIdentity` field must be used instead of
+ `spec.verify.secretRef`.
 
 ```yaml
 spec:
   verify:
     provider: cosign
+    matchOIDCIdentity:
+      - issuer: "^https://token.actions.githubusercontent.com$"
+        subject: "^https://github.com/org/app-repository.*$"
 ```
+
+The `matchOIDCIdentity` entries must contain the following fields:
+
+- `.issuer`, regexp that matches against the OIDC issuer.
+- `.subject`, regexp that matches against the subject identity in the certificate.
+
+The entries are evaluated in an OR fashion, i.e. the identity is deemed to be
+verified if any one entry successfully matches against the identity.
 
 When using the keyless method, Flux will verify the signatures in the Rekor
 transparency log instance hosted at [rekor.sigstore.dev](https://rekor.sigstore.dev/).
